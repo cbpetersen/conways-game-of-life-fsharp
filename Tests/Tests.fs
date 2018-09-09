@@ -2,24 +2,93 @@ module Tests
 
 open System
 open Xunit
-
-//The universe of the Game of Life is an infinite, two-dimensional orthogonal grid of square cells, each of which is in one of two possible states, alive or dead, (or populated and unpopulated, respectively). Every cell interacts with its eight neighbours, which are the cells that are horizontally, vertically, or diagonally adjacent. At each step in time, the following transitions occur:
-
-//    Any live cell with fewer than two live neighbors dies, as if by under population.
-//    Any live cell with two or three live neighbors lives on to the next generation.
-//    Any live cell with more than three live neighbors dies, as if by overpopulation.
-//    Any dead cell with exactly three live neighbors becomes a live cell, as if by reproduction.
-
-//The initial pattern constitutes the seed of the system. The first generation is created by applying the above rules simultaneously to every cell in the seed; births and deaths occur simultaneously, and the discrete moment at which this happens is sometimes called a tick. Each generation is a pure function of the preceding one. The rules continue to be applied repeatedly to create further generations. 
+open GameOfLife.Game
 
 [<Fact>]
-let ``Center cells can reproduce`` () =
-    Assert.True(true)
+let ``a cell without neighbors stays dead`` () =
+    let grid = {Grid = [Dead;]; height = 1; width = 1} |> Cycle
+    Assert.Equal(Dead, liveAt grid (0,0))
 
 [<Fact>]
-let ``Right cells can reproduce`` () =
-    Assert.True(true)
+let ``a cell without neighbors dies`` () =
+    let grid = {Grid = [Live;]; height = 1; width = 1} |> Cycle
+    Assert.Equal(Dead, liveAt grid (0,0))
 
 [<Fact>]
-let ``Left cells can reproduce`` () =
-    Assert.True(true)
+let ``two vertical live cells dies from under population`` () =
+    let grid = {Grid = [Live;Live;]; height = 2; width = 1} |> Cycle
+    Assert.Equal(Dead, liveAt grid (0,0))
+    Assert.Equal(Dead, liveAt grid (0,1))
+
+[<Fact>]
+let ``two horizontal live cells dies from under population`` () =
+    let grid = {Grid = [Live;Live;]; height = 1; width = 2} |> Cycle
+    Assert.Equal(Dead, liveAt grid (0,0))
+    Assert.Equal(Dead, liveAt grid (1,0))
+
+[<Fact>]
+let ``tree live cells lives on to the next generation and a new is reproduced in 4x4`` () =
+    let grid = {Grid = [Live;Live;Live;Dead]; height = 2; width = 2} |> Cycle
+    Assert.Equal(Live, liveAt grid (0,0))
+    Assert.Equal(Live, liveAt grid (0,1))
+    Assert.Equal(Live, liveAt grid (1,0))
+    Assert.Equal(Live, liveAt grid (1,1))
+
+[<Fact>]
+let ``four horizontal lives on to the next generation`` () =
+    let grid = {Grid = [Live;Live;Live;Live;]; height = 2; width = 2} |> Cycle
+    Assert.Equal(Live, liveAt grid (0,0))
+    Assert.Equal(Live, liveAt grid (0,1))
+    Assert.Equal(Live, liveAt grid (1,0))
+    Assert.Equal(Live, liveAt grid (1,1))
+
+[<Fact>]
+let ``Block stays block`` () =
+    let grid = {
+        Grid = [
+            Dead;Dead;Dead;Dead;
+            Dead;Live;Live;Dead;
+            Dead;Live;Live;Dead;
+            Dead;Dead;Dead;Dead;
+        ]
+        height = 4
+        width = 4
+    }
+    let nextGen = Cycle grid
+
+    Assert.Equal(grid, nextGen)
+
+[<Fact>]
+let ``Beehive stays Beehive`` () =
+    let grid = {
+        Grid = [
+            Dead;Dead;Dead;Dead;Dead;Dead;
+            Dead;Dead;Live;Live;Dead;Dead;
+            Dead;Live;Dead;Dead;Live;Dead;
+            Dead;Dead;Live;Live;Dead;Dead;
+            Dead;Dead;Dead;Dead;Dead;Dead;
+        ]
+        height = 5
+        width = 6
+    }
+    let nextGen = Cycle grid
+
+    Assert.Equal(grid, nextGen)
+
+[<Fact>]
+let ``Toad becomes toad after two cycles`` () =
+    let grid = {
+        Grid = [
+            Dead;Dead;Dead;Dead;Dead;Dead;
+            Dead;Dead;Dead;Dead;Dead;Dead;
+            Dead;Dead;Live;Live;Live;Dead;
+            Dead;Live;Live;Live;Dead;Dead;
+            Dead;Dead;Dead;Dead;Dead;Dead;
+            Dead;Dead;Dead;Dead;Dead;Dead;
+        ]
+        height = 5
+        width = 6
+    }
+    let nextGen = Cycle grid |> Cycle
+
+    Assert.Equal(grid, nextGen)
