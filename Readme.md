@@ -1,5 +1,7 @@
 # Game of life
 
+![Demo image](https://github.com/cbpetersen/conways-game-of-life-fsharp/blob/master/demo.gif)
+
 ## F# .NET core CLI
 To start a 30 x 100 grid:
 
